@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1>Página de Cadastro de Usuário</h1>
+    </div>
+    <div>
+        <a href="/">
+            <button type="button">Home</button>
+        </a>
+    </div>
+    <p>
+        {{
+        message 
+        }}
+    </p>
+    <form action="/user" method="post" style="display: flex; flex-direction: column; align-items: flex-start; width: 300px;">
+        <div>
+            <label for="name">Nome:</label>
+            <input type="text" name="name" required/>
+        </div>
+        <div>
+            <label for="email">E-mail:</label>
+            <input type="email" name="email" required/>
+        </div>
+        <div>
+            <label for="password">Senha:</label>
+            <input type="password" name="password" required/>
+        </div>
+        <div>
+            <label for="matriculation">Matrícula:</label>
+            <input type="number" name="matriculation" required/>
+        </div>
+        <div>
+            <label for="course">Curso:</label>
+            <input type="text" name="course"/>
+        </div>
+        <div>
+            <label for="admin">Você trabalha na cozinha?</label>
+            <input type="checkbox" name="admin"/>
+        </div>
+        <div>
+            <button type="submit">Cadastrar Usuário</button>
+        </div>     
+    </form>
+</body>
+</html>
