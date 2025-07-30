@@ -1,6 +1,6 @@
 
-DROP TABLE IF EXISTS usuarios;
-CREATE TABLE usuarios (
+-- DROP TABLE IF EXISTS usuarios;
+CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT, 
     nome TEXT NOT NULL,               
     email TEXT UNIQUE NOT NULL,   
@@ -10,15 +10,15 @@ CREATE TABLE usuarios (
     curso TEXT 
 );
 
-DROP TABLE IF EXISTS quadro_vagas;
-CREATE TABLE quadro_vagas (
+-- DROP TABLE IF EXISTS quadro_vagas;
+CREATE TABLE IF NOT EXISTS quadro_vagas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_vagas TEXT NOT NULL UNIQUE,  -- formato 'YYYY-MM-DD'
     quantidade INTEGER NOT NULL 
 );
 
-DROP TABLE IF EXISTS reserva;
-CREATE TABLE reserva (
+-- DROP TABLE IF EXISTS reserva;
+CREATE TABLE IF NOT EXISTS reserva (
     usuario_id INTEGER,   
     vaga_id INTEGER, 
     situacao TEXT NOT NULL CHECK (situacao IN ('ativa', 'cancelada', 'usada')), 

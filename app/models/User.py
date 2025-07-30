@@ -1,5 +1,5 @@
 from ..db.database import get_db
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 
 class User:
     def __init__(self, name, email, password, admin, matriculation, course):
@@ -22,5 +22,4 @@ class User:
         )
         db.commit()
         return cursor.lastrowid
-    
 
