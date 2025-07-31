@@ -16,10 +16,10 @@ class User:
 
     def create_user(self):
         db = get_db()
-        cursor = db.execute(
+        db.execute(
             'INSERT INTO usuarios (nome, email, senha_hash, administrador, matricula, curso) VALUES (?, ?, ?, ?, ?, ?)',
             (self.name, self.email, self.hash_password(self.password), self.admin, self.matriculation, self.course)
         )
         db.commit()
-        return cursor.lastrowid
+        return
 

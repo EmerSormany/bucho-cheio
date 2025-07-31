@@ -1,0 +1,16 @@
+from ..db.database import get_db
+
+class Vacancies:
+    def __init__(self, date, vacancies):
+        self.date = date
+        self.vacancies = vacancies
+
+    def create_vacancy(self):
+        db = get_db()
+        db.execute(
+            'INSERT INTO quadro_vagas (data_vagas, quantidade) VALUES (?, ?)',
+            (self.date, self.vacancies)
+        )
+        db.commit()
+        return 
+    

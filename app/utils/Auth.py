@@ -3,8 +3,6 @@ from flask import session, render_template
 
 
 class Auth:
-    # verificar implementação de init
-
     @staticmethod
     def login_required(f):
         @wraps(f)

@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, session
 from flask.views import MethodView
 from .models.User import User
 from .models.Login import Login
+from .models.Vacancies import Vacancies
+from .utils.Auth import Auth
 
 bp = Blueprint('main', __name__)
 
@@ -12,7 +14,6 @@ class IndexView(MethodView):
 bp.add_url_rule('/', view_func=IndexView.as_view('index'))
 
 class UserView(MethodView):
-    # concluir, verificar controle de rota por tipo de usuário
     def get(self):
         return render_template('user.html')
     
@@ -62,8 +63,7 @@ class LoginView(MethodView):
                 if user['admin'] == 1:
                     session['admin'] = user['admin']
 
-                # alterar retorno render_template para páginas de acorodo por tipo de usuário
-                return render_template('index.html', message="Login realizado com sucesso!")
+                return render_template('home.html', message="Login realizado com sucesso!")
             else:
                 return render_template('login.html', message="Email ou senha inválidos.")
         except Exception as e:
@@ -80,3 +80,32 @@ class LogoutView(MethodView):
         return render_template('index.html', message="Logout realizado com sucesso!")
     
 bp.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
+
+class HomeView(MethodView):
+    @Auth.login_required
+    def get(self):
+        return render_template('home.html', message="Bem-vindo ao seu painel!")
+    
+bp.add_url_rule('/home', view_func=HomeView.as_view('home'))
+
+class VacanciesView(MethodView):
+    @Auth.login_required
+    @Auth.admin_required
+    def get(self):
+        return render_template('vacancies.html')
+
+    @Auth.login_required
+    @Auth.admin_required
+    def post(self):
+        date = request.form.get('date')
+        quantity = request.form.get('quantity')
+
+        try:
+            new_vacancy = Vacancies(date, quantity)
+            new_vacancy.create_vacancy()
+            return render_template('vacancies.html', message="Vagas criadas com sucesso!")
+        except Exception as e:
+            return str(e), 500
+            # return 'Erro no servidor', 500
+
+bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
