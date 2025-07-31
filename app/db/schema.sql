@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS quadro_vagas (
 CREATE TABLE IF NOT EXISTS reserva (
     usuario_id INTEGER,   
     vaga_id INTEGER, 
-    situacao TEXT NOT NULL CHECK (situacao IN ('ativa', 'cancelada', 'usada')), 
+    situacao TEXT NOT NULL CHECK (situacao IN ('ativa', 'cancelada', 'usada', 'pendente')), 
     qr_code TEXT NOT NULL UNIQUE,  
     chekin TEXT DEFAULT NULL, -- formato 'YYYY-MM-DD HH:MM:SS'
   

@@ -3,7 +3,10 @@ from flask.views import MethodView
 from .models.User import User
 from .models.Login import Login
 from .models.Vacancies import Vacancies
+from .models.Reservation import Reservation
 from .utils.Auth import Auth
+from .utils.QRcode import QRCode
+from datetime import date, timedelta
 
 bp = Blueprint('main', __name__)
 
@@ -109,3 +112,46 @@ class VacanciesView(MethodView):
             # return 'Erro no servidor', 500
 
 bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
+
+class ReservationView(MethodView):
+    @Auth.login_required
+    def get(self):
+        user = Reservation.get_user_by_id(session.get('user_id'))
+        return render_template('reservation.html', user=user)
+
+    @Auth.login_required
+    def post(self):
+        user_id = session.get('user_id')
+        try:
+            tomorrow = date.today() + timedelta(days=1)
+            id_vacancy = Vacancies.get_vacancies_by_date(tomorrow.strftime('%Y-%m-%d'))
+
+            if id_vacancy is None:
+                return render_template('reservation.html', message="Não há vagas disponíveis para amanhã.")
+            
+            qr_code = QRCode.generate_qr_code(user_id, id_vacancy)
+            reservation = Reservation(user_id, id_vacancy, qr_code)
+            reservation.save()
+
+            return render_template('reservation.html', message="Reserva realizada com sucesso!")
+
+        except Exception as e:
+            return str(e), 500
+            # return 'Erro no servidor', 500
+
+bp.add_url_rule('/reservation', view_func=ReservationView.as_view('reservation'))
+
+class AdminView(MethodView):
+    # rota para teste, deverá ser removida ou alterada
+    @Auth.login_required
+    @Auth.admin_required
+    def get(self):
+        
+        consulta = Reservation.get_reservations()
+
+        for row in consulta:
+            print(dict(row))
+
+        return render_template('home.html', message="Bem-vindo ao painel de administração!")
+    
+bp.add_url_rule('/admin', view_func=AdminView.as_view('admin'))

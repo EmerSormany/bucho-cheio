@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Reservar Vaga</h1>
+    <h5>Preencha o formulário para se candidatar ao almoço</h5>
+        <form action="/reservation" method="post">
+        <div>
+            <label for="name">Nome:</label>
+            <input type="text" name="name" value="{{user.name}}" required/>
+        </div>
+        <div>
+            <label for="email">E-mail:</label>
+            <input type="email" name="email" value="{{user.email}}" required/>
+        </div>
+        <div>
+            <label for="matriculation">Matrícula:</label>
+            <input type="number" name="matriculation" value="{{user.matriculation}}" required/>
+        </div>
+        <div>
+            <label for="course">Curso:</label>
+            <input type="text" name="course" value="{{user.course}}" required/>
+        </div>
+        <div>
+            <button type="submit">Enviar</button>
+        </div>
+    </form>
+</body>
+</html>

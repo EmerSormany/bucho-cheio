@@ -21,5 +21,4 @@ class User:
             (self.name, self.email, self.hash_password(self.password), self.admin, self.matriculation, self.course)
         )
         db.commit()
-        return
 

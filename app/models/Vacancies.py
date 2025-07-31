@@ -14,3 +14,13 @@ class Vacancies:
         db.commit()
         return 
     
+    @staticmethod
+    def get_vacancies_by_date(date):
+        db = get_db()
+        cursor = db.execute(
+            'SELECT id FROM quadro_vagas WHERE data_vagas = ?',
+            (date,)
+        ).fetchone()
+        if cursor:
+            return cursor['id']
+        return None
