@@ -8,7 +8,10 @@
 <body>
     <h1>Reservar Vaga</h1>
     <h5>Preencha o formulário para se candidatar ao almoço</h5>
-        <form action="/reservation" method="post">
+    <p>
+        {{ message }}
+    </p>
+    <form action="/reservation" method="post">
         <div>
             <label for="name">Nome:</label>
             <input type="text" name="name" value="{{user.name}}" required/>
