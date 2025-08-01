@@ -22,3 +22,21 @@ class User:
         )
         db.commit()
 
+    @staticmethod
+    def get_user_by_id(user_id):
+        db = get_db()
+        cursor = db.execute(
+            'SELECT * FROM usuarios WHERE id = ?',
+            (user_id,)
+        )
+        row = cursor.fetchone()
+        if row:
+            return {
+                'id': row['id'],
+                'name': row['nome'],
+                'email': row['email'],
+                'matriculation': row['matricula'],
+                'course': row['curso'],
+            }
+        return None
+

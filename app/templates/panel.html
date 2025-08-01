@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+            table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f3f3;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            border-radius: 4px;
+        }
+        .aprovar {
+            background-color: #28a745;
+        }
+        .negar {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <h1>Painel de Administração</h1>
+    <form action="/admin" method="get">
+        <div>
+            <label for="date">Buscar reservas por data:</label>
+            <input type="date" name="date" required/>
+        </div>
+        <div>
+            <button type="submit">Buscar</button>
+        </div>
+    </form>
+
+    {{ message }}
+
+    {% if data %}
+        <h2>Painel de Candidaturas - {{ date }}</h2>
+        <form action="/admin" method="post">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Matrícula</th>
+                        <th>Curso</th>
+                        <th>Situação</th>
+                        <th>Data da Vaga</th>
+                        <th>Vagas Restantes</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in data %}
+                        <tr>
+                            <td>{{ reservation.nome }}</td>
+                            <td>{{ reservation.email }}</td>
+                            <td>{{ reservation.matricula }}</td>
+                            <td>{{ reservation.curso }}</td>
+                            <td>{{ reservation.situacao }}</td>
+                            <td>{{ reservation.data_vagas }}</td>
+                            <td>
+                                <span class="vacany-count" id="vacancy_{{ loop.index }}">{{ reservation.quantidade }}</span>
+                                <input type="hidden" id="original_vacancy_{{ loop.index }}" value="{{ reservation.quantidade }}">
+                            </td>
+                            <td>
+                                <input type="hidden" name="user_id_{{ loop.index }}" value="{{ reservation.usuario_id }}">
+                                <input type="hidden" name="vacancy_id_{{ loop.index }}" value="{{ reservation.vaga_id }}">
+    
+                                <select name="new_situation_{{ loop.index }}"  class="select-situation" data-index="{{ loop.index }}">
+                                    <option value="cancelada">Negar</option>
+                                    <option value="ativa">Aprovar</option>
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="hidden" name="total_lines" value="{{ data|length }}">
+            <button type="submit">Atualizar Reservas</button>
+        </form>
+    {% endif %}
+
+    <script>
+        document.querySelectorAll('.select-situation').forEach(select => {
+            select.addEventListener('change', function () {
+                const index = this.dataset.index;
+                const vacancySpan = document.getElementById('vacancy_' + index);
+                const originalVacancy = parseInt(document.getElementById('original_vacancy_' + index).value);
+
+                const previous = this.dataset.initialCondition || "";
+                const current = this.value;
+
+                let currentCount = parseInt(vacancySpan.textContent);
+
+                if (previous === "ativa") {
+                    currentCount += 1;
+                }
+
+                if (current === "ativa") {
+                    currentCount -= 1;
+                }
+
+                currentCount = Math.max(0, currentCount);
+
+                vacancySpan.textContent = currentCount;
+                this.dataset.initialCondition = current;
+            });
+        });
+    </script>
+</body>
+</html>

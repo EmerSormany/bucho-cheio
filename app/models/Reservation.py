@@ -14,30 +14,12 @@ class Reservation:
             (self.user_id, self.vacancy_id, self.status, self.qr_code)
         )
         db.commit()
-
-    @staticmethod
-    def get_user_by_id(user_id):
-        db = get_db()
-        cursor = db.execute(
-            'SELECT * FROM usuarios WHERE id = ?',
-            (user_id,)
-        )
-        row = cursor.fetchone()
-        if row:
-            return {
-                'id': row['id'],
-                'name': row['nome'],
-                'email': row['email'],
-                'matriculation': row['matricula'],
-                'course': row['curso'],
-            }
-        return None
     
-    # método para teste, deverá ser removido ou alterado
+    # método para teste, deverá ser alterado
     @staticmethod
-    def get_reservations():
+    def get_reservations_by_date():
         db = get_db()
         cursor = db.execute(
-            'SELECT * FROM reserva'
+            'SELECT * FROM quadro_vagas WHERE data = ?',
         )
         return cursor.fetchall()

@@ -4,6 +4,7 @@ from .models.User import User
 from .models.Login import Login
 from .models.Vacancies import Vacancies
 from .models.Reservation import Reservation
+from .models.Admin import Admin
 from .utils.Auth import Auth
 from .utils.QRcode import QRCode
 from datetime import date, timedelta
@@ -65,12 +66,12 @@ class LoginView(MethodView):
 
                 if user['admin'] == 1:
                     session['admin'] = user['admin']
+                    return render_template('panel.html', message="Login realizado com sucesso!")
 
                 return render_template('home.html', message="Login realizado com sucesso!")
             else:
-                return render_template('login.html', message="Email ou senha inválidos.")
+                return render_template('login.html', message="Dados inválidos.")
         except Exception as e:
-            print(f"Erro ao realizar login: {e}")
             return str(e), 500
             # return 'Erro no servidor', 500
 
@@ -116,7 +117,7 @@ bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
 class ReservationView(MethodView):
     @Auth.login_required
     def get(self):
-        user = Reservation.get_user_by_id(session.get('user_id'))
+        user = User.get_user_by_id(session.get('user_id'))
         return render_template('reservation.html', user=user)
 
     @Auth.login_required
@@ -142,16 +143,48 @@ class ReservationView(MethodView):
 bp.add_url_rule('/reservation', view_func=ReservationView.as_view('reservation'))
 
 class AdminView(MethodView):
-    # rota para teste, deverá ser removida ou alterada
     @Auth.login_required
     @Auth.admin_required
     def get(self):
-        
-        consulta = Reservation.get_reservations()
+        date = request.args.get('date')
 
-        for row in consulta:
-            print(dict(row))
+        if date:
+            try:
+                reservations = Admin.list_applications_by_date(date)
 
-        return render_template('home.html', message="Bem-vindo ao painel de administração!")
+                if not reservations:
+                    return render_template('panel.html', message="Nenhuma candidatura encontrada para esta data.")
+                return render_template('panel.html', data=reservations, date=date)
+            except Exception as e:
+                return str(e), 500
+                # return 'Erro no servidor', 500
+        else:
+            return render_template('panel.html')
+    
+    @Auth.login_required
+    @Auth.admin_required
+    def post(self):
+        total = int(request.form.get('total_lines'))
+
+        for i in range(1, total + 1):
+            user_id = request.form.get(f'user_id_{i}')
+            vacancy_id = request.form.get(f'vacancy_id_{i}')
+            new_situation = request.form.get(f'new_situation_{i}')
+
+            if new_situation == 'ativa':
+                try:
+                    Admin.approve_application(user_id, vacancy_id)
+                except Exception as e:
+                    return str(e), 500
+                    # return 'Erro no servidor', 500
+            elif new_situation == 'cancelada':
+                try:
+                    Admin.deny_application(user_id, vacancy_id)
+                except Exception as e:
+                    return str(e), 500
+                    # return 'Erro no servidor', 500
+
+        return render_template('panel.html', message="Reservas atualizadas com sucesso!")
+
     
 bp.add_url_rule('/admin', view_func=AdminView.as_view('admin'))
