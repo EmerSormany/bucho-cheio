@@ -40,6 +40,9 @@
             <button type="button">Home</button>
         </a>
     </div>
+    <p>
+        {{ message }}
+    </p>
     <form action="/admin" method="get">
         <div>
             <label for="date">Buscar reservas por data:</label>
@@ -50,7 +53,7 @@
         </div>
     </form>
 
-    {{ message }}
+    
 
     {% if data %}
         <h2>Painel de Candidaturas - {{ date }}</h2>

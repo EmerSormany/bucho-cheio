@@ -49,3 +49,20 @@ class Admin:
         """, (usuario_id, vaga_id))
         db.commit()
 
+    @staticmethod
+    def deny_application_aproved(usuario_id, vaga_id):
+        db = get_db()
+        db.execute("""
+            UPDATE reserva
+            SET situacao = 'cancelada'
+            WHERE usuario_id = ? AND vaga_id = ?
+        """, (usuario_id, vaga_id))
+
+        db.execute("""
+            UPDATE quadro_vagas
+            SET quantidade = quantidade + 1
+            WHERE id = ?
+        """, (vaga_id,))
+
+        db.commit()
+

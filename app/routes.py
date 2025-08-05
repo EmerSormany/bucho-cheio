@@ -177,18 +177,17 @@ class AdminView(MethodView):
             vacancy_id = request.form.get(f'vacancy_id_{i}')
             new_situation = request.form.get(f'new_situation_{i}')
 
-            if new_situation == 'ativa':
-                try:
+            try:
+                current_status = Reservation.get_aplication_status(user_id, vacancy_id)
+                if new_situation == 'ativa' and (current_status['situacao'] == 'pendente' or current_status['situacao'] == 'cancelada'):
                     Admin.approve_application(user_id, vacancy_id)
-                except Exception as e:
-                    return str(e), 500
-                    # return 'Erro no servidor', 500
-            elif new_situation == 'cancelada':
-                try:
+                elif new_situation == 'cancelada' and current_status['situacao'] == 'ativa':
+                    Admin.deny_application_aproved(user_id, vacancy_id)
+                elif new_situation == 'cancelada' and current_status['situacao'] == 'pendente':
                     Admin.deny_application(user_id, vacancy_id)
-                except Exception as e:
-                    return str(e), 500
-                    # return 'Erro no servidor', 500
+            except Exception as e:
+                return str(e), 500
+                # return 'Erro no servidor', 500
 
         return render_template('panel.html', message="Reservas atualizadas com sucesso!")
 
