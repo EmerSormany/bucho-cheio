@@ -42,7 +42,8 @@ class UserView(MethodView):
         except Exception as e:
             return str(e), 500
             # return 'Erro no servidor', 500
-        
+
+# rota de cadastro de usuário  
 bp.add_url_rule('/user', view_func=UserView.as_view('user'))
 
 class LoginView(MethodView):
@@ -66,7 +67,7 @@ class LoginView(MethodView):
 
                 if user['admin'] == 1:
                     session['admin'] = user['admin']
-                    return render_template('panel.html', message="Login realizado com sucesso!")
+                    return render_template('panel.html', message="Painel da administração.")
 
                 return render_template('home.html', message="Login realizado com sucesso!")
             else:
@@ -75,6 +76,7 @@ class LoginView(MethodView):
             return str(e), 500
             # return 'Erro no servidor', 500
 
+# rota de login
 bp.add_url_rule('/login', view_func=LoginView.as_view('login'))
 
 class LogoutView(MethodView):
@@ -83,13 +85,15 @@ class LogoutView(MethodView):
         session.pop('admin', None)
         return render_template('index.html', message="Logout realizado com sucesso!")
     
+# rota de logout
 bp.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
 
 class HomeView(MethodView):
     @Auth.login_required
     def get(self):
-        return render_template('home.html', message="Bem-vindo ao seu painel!")
+        return render_template('home.html')
     
+# rota do usuário comum
 bp.add_url_rule('/home', view_func=HomeView.as_view('home'))
 
 class VacanciesView(MethodView):
@@ -112,6 +116,7 @@ class VacanciesView(MethodView):
             return str(e), 500
             # return 'Erro no servidor', 500
 
+# rota para cadastrar vagas, apenas para admin
 bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
 
 class ReservationView(MethodView):
@@ -140,6 +145,7 @@ class ReservationView(MethodView):
             return str(e), 500
             # return 'Erro no servidor', 500
 
+#  rota para se candidatar a uma vaga
 bp.add_url_rule('/reservation', view_func=ReservationView.as_view('reservation'))
 
 class AdminView(MethodView):
@@ -186,5 +192,5 @@ class AdminView(MethodView):
 
         return render_template('panel.html', message="Reservas atualizadas com sucesso!")
 
-    
+# rota do painel de administração 
 bp.add_url_rule('/admin', view_func=AdminView.as_view('admin'))

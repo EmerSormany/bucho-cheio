@@ -1,5 +1,7 @@
 from flask import Flask
 from .db.database import init_db, close_db
+from . import routes
+from .utils.Auth import Auth
 
 def create_app():
     app = Flask(__name__)
@@ -8,7 +10,8 @@ def create_app():
     with app.app_context():
         init_db(app)
 
-    from . import routes
+    app.before_request(Auth.load_logged_user)
+
     app.register_blueprint(routes.bp)  
 
     app.teardown_appcontext(close_db)
