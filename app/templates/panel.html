@@ -57,6 +57,7 @@
 
     {% if data %}
         <h2>Painel de Candidaturas - {{ date }}</h2>
+        <div style="font-weight: bold;">Vagas Restantes: <span id="vacancies-left">{{ data[0].quantidade }}</span></div>
         <form action="/admin" method="post">
             <table>
                 <thead>
@@ -66,8 +67,6 @@
                         <th>Matrícula</th>
                         <th>Curso</th>
                         <th>Situação</th>
-                        <th>Data da Vaga</th>
-                        <th>Vagas Restantes</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -79,18 +78,14 @@
                             <td>{{ reservation.matricula }}</td>
                             <td>{{ reservation.curso }}</td>
                             <td>{{ reservation.situacao }}</td>
-                            <td>{{ reservation.data_vagas }}</td>
-                            <td>
-                                <span class="vacany-count" id="vacancy_{{ loop.index }}">{{ reservation.quantidade }}</span>
-                                <input type="hidden" id="original_vacancy_{{ loop.index }}" value="{{ reservation.quantidade }}">
-                            </td>
                             <td>
                                 <input type="hidden" name="user_id_{{ loop.index }}" value="{{ reservation.usuario_id }}">
                                 <input type="hidden" name="vacancy_id_{{ loop.index }}" value="{{ reservation.vaga_id }}">
-    
-                                <select name="new_situation_{{ loop.index }}"  class="select-situation" data-index="{{ loop.index }}">
-                                    <option value="cancelada">Negar</option>
-                                    <option value="ativa">Aprovar</option>
+                                <input type="hidden" class="original-status" value="{{ reservation.situacao }}">
+
+                                <select name="new_situation_{{ loop.index }}" class="select-situation">
+                                    <option value="cancelada" {% if reservation.situacao == 'cancelada' %}selected{% endif %}>Negar</option>
+                                    <option value="ativa" {% if reservation.situacao == 'ativa' %}selected{% endif %}>Aprovar</option>
                                 </select>
                             </td>
                         </tr>
@@ -102,32 +97,34 @@
         </form>
     {% endif %}
 
-    <script>
-        document.querySelectorAll('.select-situation').forEach(select => {
-            select.addEventListener('change', function () {
-                const index = this.dataset.index;
-                const vacancySpan = document.getElementById('vacancy_' + index);
-                const originalVacancy = parseInt(document.getElementById('original_vacancy_' + index).value);
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const totalVacanciesSpan = document.getElementById('vacancies-left');
+        let initialVacancies = parseInt(totalVacanciesSpan.textContent);
 
-                const previous = this.dataset.initialCondition || "";
-                const current = this.value;
+        function updateVacancyCount() {
+            let vacanciesLeft = initialVacancies;
+            document.querySelectorAll('tr').forEach(row => {
+                const select = row.querySelector('.select-situation');
+                if (select) {
+                    const originalStatus = row.querySelector('.original-status').value;
+                    const newStatus = select.value;
 
-                let currentCount = parseInt(vacancySpan.textContent);
-
-                if (previous === "ativa") {
-                    currentCount += 1;
+                    if (originalStatus !== 'ativa' && newStatus === 'ativa') {
+                        vacanciesLeft--;
+                    }
+                    if (originalStatus === 'ativa' && newStatus !== 'ativa') {
+                        vacanciesLeft++;
+                    }
                 }
-
-                if (current === "ativa") {
-                    currentCount -= 1;
-                }
-
-                currentCount = Math.max(0, currentCount);
-
-                vacancySpan.textContent = currentCount;
-                this.dataset.initialCondition = current;
             });
+            totalVacanciesSpan.textContent = vacanciesLeft;
+        }
+
+        document.querySelectorAll('.select-situation').forEach(select => {
+            select.addEventListener('change', updateVacancyCount);
         });
-    </script>
+    });
+</script>
 </body>
 </html>
