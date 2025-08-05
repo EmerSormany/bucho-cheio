@@ -142,7 +142,7 @@ class ReservationView(MethodView):
             return render_template('reservation.html', message="Reserva realizada com sucesso!")
 
         except Exception as e:
-            return str(e), 500
+            return render_template('reservation.html', message="Você já possui uma reserva para amanhã.")
             # return 'Erro no servidor', 500
 
 #  rota para se candidatar a uma vaga
