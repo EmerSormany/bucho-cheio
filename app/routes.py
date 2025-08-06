@@ -9,18 +9,22 @@ from .utils.Auth import Auth
 from .utils.QRcode import QRCode
 from datetime import date, timedelta
 
+# define blueprint para as rotas
 bp = Blueprint('main', __name__)
 
 class IndexView(MethodView):
     def get(self):
         return render_template('index.html')
 
+# rota inicial do sistema
 bp.add_url_rule('/', view_func=IndexView.as_view('index'))
 
 class UserView(MethodView):
+    # retorna o template de cadastro de usuário
     def get(self):
         return render_template('user.html')
     
+    # recebe os dados do formulário e cria um novo usuário
     def post(self):
         name = request.form.get('name')
         email = request.form.get('email')
@@ -46,9 +50,11 @@ class UserView(MethodView):
 bp.add_url_rule('/user', view_func=UserView.as_view('user'))
 
 class LoginView(MethodView):
+    # retorna o template de login
     def get(self):
         return render_template('login.html')
 
+    # recebe os dados do formulário e realiza o login
     def post(self):
         email = request.form.get('email')
         password = request.form.get('password')
@@ -62,9 +68,11 @@ class LoginView(MethodView):
             user = Login.login(found_user, password)
 
             if user:
+                # armazena id do usuário na sessão
                 session['user_id'] = user['id']
 
                 if user['admin'] == 1:
+                    # se for admin, armazena também na sessão
                     session['admin'] = user['admin']
                     return render_template('panel.html', message="Painel da administração.")
 
@@ -78,6 +86,7 @@ class LoginView(MethodView):
 bp.add_url_rule('/login', view_func=LoginView.as_view('login'))
 
 class LogoutView(MethodView):
+    # realiza o logout do usuário
     def post(self):
         session.pop('user_id', None)
         session.pop('admin', None)
@@ -87,6 +96,8 @@ class LogoutView(MethodView):
 bp.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
 
 class HomeView(MethodView):
+    # retorna o template da home
+    # rota protegida com decorador de login
     @Auth.login_required
     def get(self):
         return render_template('home.html')
@@ -95,11 +106,14 @@ class HomeView(MethodView):
 bp.add_url_rule('/home', view_func=HomeView.as_view('home'))
 
 class VacanciesView(MethodView):
+    # retorna o template de cadastro de vagas
+    # rota protegida com decorador de login e admin
     @Auth.login_required
     @Auth.admin_required
     def get(self):
         return render_template('vacancies.html')
 
+    # recebe os dados do formulário e cria novas vagas
     @Auth.login_required
     @Auth.admin_required
     def post(self):
@@ -107,6 +121,7 @@ class VacanciesView(MethodView):
         quantity = request.form.get('quantity')
 
         try:
+            # cria vagas com data e quantidade informadas
             new_vacancy = Vacancies(date, quantity)
             new_vacancy.create_vacancy()
             return render_template('vacancies.html', message="Vagas criadas com sucesso!")
@@ -117,27 +132,33 @@ class VacanciesView(MethodView):
 bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
 
 class ReservationView(MethodView):
+    # retorna o template de reserva
+
     @Auth.login_required
     def get(self):
         user = User.get_user_by_id(session.get('user_id'))
+        # preenche automaticamente os campos com os dados do usuário
         return render_template('reservation.html', user=user)
 
     @Auth.login_required
     def post(self):
         user_id = session.get('user_id')
         try:
+            # seleciona data atual e soma um dia para pegar a vaga de amanhã, regra do atual fomulário manual
             tomorrow = date.today() + timedelta(days=1)
+            
             id_vacancy = Vacancies.get_vacancies_by_date(tomorrow.strftime('%Y-%m-%d'))
 
+            # verifica se há vagas disponíveis para o dia da candidatura
             if id_vacancy is None:
                 return render_template('reservation.html', message="Não há vagas disponíveis para amanhã.")
             
+            # gera qrcode e salva a reserva
             qr_code = QRCode.generate_qr_code(user_id, id_vacancy)
             reservation = Reservation(user_id, id_vacancy, qr_code)
             reservation.save()
 
             return render_template('reservation.html', message="Reserva realizada com sucesso!")
-
         except Exception as e:
             return render_template('reservation.html', message="Você já possui uma reserva para amanhã.")
 
@@ -152,6 +173,7 @@ class AdminView(MethodView):
 
         if date:
             try:
+                #  busca reservas por data
                 reservations = Admin.list_applications_by_date(date)
 
                 if not reservations:
@@ -162,6 +184,7 @@ class AdminView(MethodView):
         else:
             return render_template('panel.html')
     
+    # salva as alterações feitas no painel de administração, se reserva for aprovada ou cancelada
     @Auth.login_required
     @Auth.admin_required
     def post(self):
@@ -173,6 +196,7 @@ class AdminView(MethodView):
             new_situation = request.form.get(f'new_situation_{i}')
 
             try:
+                # seleciona método de acordo com situação atual e novo da reserva
                 current_status = Reservation.get_aplication_status(user_id, vacancy_id)
                 if new_situation == 'ativa' and (current_status['situacao'] == 'pendente' or current_status['situacao'] == 'cancelada'):
                     Admin.approve_application(user_id, vacancy_id)
@@ -195,7 +219,7 @@ class ChekinView(MethodView):
         
         try:
             reservation = Reservation.get_reservation(user_id)
-
+            # renderiza qr_code se a reservva existir e estiver ativa para o id do usuário
             if reservation and reservation['status'] == 'ativa':
                 return render_template('checkin.html', qr_code=reservation['qr_code'], date=reservation['data_vagas'])
 

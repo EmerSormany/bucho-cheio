@@ -2,8 +2,6 @@ import qrcode
 import json
 from io import BytesIO
 import base64
-from PIL import Image
-# from pyzbar.pyzbar import decode
 
 class QRCode:
     @staticmethod
