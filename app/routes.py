@@ -41,7 +41,6 @@ class UserView(MethodView):
             return render_template('index.html', message="Cadastrado com sucesso!")
         except Exception as e:
             return str(e), 500
-            # return 'Erro no servidor', 500
 
 # rota de cadastro de usuário  
 bp.add_url_rule('/user', view_func=UserView.as_view('user'))
@@ -74,7 +73,6 @@ class LoginView(MethodView):
                 return render_template('login.html', message="Dados inválidos.")
         except Exception as e:
             return str(e), 500
-            # return 'Erro no servidor', 500
 
 # rota de login
 bp.add_url_rule('/login', view_func=LoginView.as_view('login'))
@@ -114,7 +112,6 @@ class VacanciesView(MethodView):
             return render_template('vacancies.html', message="Vagas criadas com sucesso!")
         except Exception as e:
             return str(e), 500
-            # return 'Erro no servidor', 500
 
 # rota para cadastrar vagas, apenas para admin
 bp.add_url_rule('/vacancies', view_func=VacanciesView.as_view('vacancies'))
@@ -143,7 +140,6 @@ class ReservationView(MethodView):
 
         except Exception as e:
             return render_template('reservation.html', message="Você já possui uma reserva para amanhã.")
-            # return 'Erro no servidor', 500
 
 #  rota para se candidatar a uma vaga
 bp.add_url_rule('/reservation', view_func=ReservationView.as_view('reservation'))
@@ -163,7 +159,6 @@ class AdminView(MethodView):
                 return render_template('panel.html', data=reservations, date=date)
             except Exception as e:
                 return str(e), 500
-                # return 'Erro no servidor', 500
         else:
             return render_template('panel.html')
     
@@ -187,9 +182,26 @@ class AdminView(MethodView):
                     Admin.deny_application(user_id, vacancy_id)
             except Exception as e:
                 return str(e), 500
-                # return 'Erro no servidor', 500
 
         return render_template('panel.html', message="Reservas atualizadas com sucesso!")
 
 # rota do painel de administração 
 bp.add_url_rule('/admin', view_func=AdminView.as_view('admin'))
+
+class ChekinView(MethodView):
+    @Auth.login_required
+    def get(self):
+        user_id = session.get('user_id')
+        
+        try:
+            reservation = Reservation.get_reservation(user_id)
+
+            if reservation and reservation['status'] == 'ativa':
+                return render_template('checkin.html', qr_code=reservation['qr_code'], date=reservation['data_vagas'])
+
+            return render_template('home.html', message="Você não possui reserva.")
+        except Exception as e:
+            return str(e), 500
+
+# rota de check-in
+bp.add_url_rule('/checkin', view_func=ChekinView.as_view('checkin'))

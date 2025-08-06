@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Check-in do Almoço</h1>
+    <div>
+        <a href="/home">
+            <button type="button">Home</button>
+        </a>
+    </div>
+    <p>Aproxime o QR Code do leitor para confirmar sua reserva.</p>
+    <div>
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code para check-in" style="width: 200px; height: 200px;">
+    </div>
+    <p>QR Code válido para data {{ date }}</p>
+</body>
+</html>
